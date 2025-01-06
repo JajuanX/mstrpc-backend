@@ -1,10 +1,10 @@
 require("dotenv").config();
 const mongoose = require('mongoose');
-const express = require('express')
+const express = require('express');
 const app = express();
-const {urlencoded, json} = require('body-parser');
-const morgan = require('morgan')
-const cors = require('cors')
+const { urlencoded, json } = require('body-parser');
+const morgan = require('morgan');
+const cors = require('cors');
 const articlesRoute = require("./routes/articles");
 const usersRoute = require("./routes/users");
 const uploadsRoute = require("./routes/uploads");
@@ -18,22 +18,23 @@ const profilesRoute = require("./routes/profiles");
 const emailsRoute = require("./routes/emails");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-app.use(cors())
-app.use(morgan('dev'))
-app.use(urlencoded({extended: true}))
+const PORT = process.env.PORT || 8080;
+
+app.use(cors());
+app.use(morgan('dev'));
+app.use(urlencoded({ extended: true }));
 app.use("/stripe", stripeRoute);
-app.use(json())
+app.use(json());
 app.use(express.static('public'));
 
-
 const connectToMongo = () => {
-	const uri = process.env.ATLAS_URI
+	const uri = process.env.ATLAS_URI;
 	return mongoose.connect(uri);
-}
+};
 
 app.get('/', (_req, res) => {
-	res.send('Welcome to MSTRPC!')
-})
+	res.send('Welcome to MSTRPC!');
+});
 
 app.use("/articles", articlesRoute);
 app.use("/profiles", profilesRoute);
@@ -48,13 +49,11 @@ app.use("/emails", emailsRoute);
 
 connectToMongo()
 	.then(() => {
-		console.log('connected to mongoDB');
-		app.listen(8080, () => {
-			console.log("Server is listening on port 8080");
+		console.log('Connected to MongoDB');
+		app.listen(PORT, () => {
+			console.log(`Server is listening on port ${PORT}`);
 		});
 	})
 	.catch((err) => {
-		console.error(err)
-	})
-
-
+		console.error(err);
+	});
