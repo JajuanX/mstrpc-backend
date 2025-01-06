@@ -31,6 +31,10 @@ const connectToMongo = () => {
 	return mongoose.connect(uri);
 }
 
+app.get('/', (_req, res) => {
+	res.send('Welcome to MSTRPC!')
+})
+
 app.use("/articles", articlesRoute);
 app.use("/profiles", profilesRoute);
 app.use("/users", usersRoute);
