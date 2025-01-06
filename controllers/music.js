@@ -23,11 +23,12 @@ const searchAppleMusic = async (storefront, searchTerm) => {
 };
 
 const getSong = async (req, res) => {
-	searchAppleMusic(storefront, req.body.search).then(data => {
-		if (data) {
-			res.json(data)
-		}
-	});
+	searchAppleMusic(storefront, req.body.search)
+		.then(data => {
+			if (data) {
+				res.json(data)
+			}
+		});
 }
 
 

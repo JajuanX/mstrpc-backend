@@ -175,6 +175,9 @@ router.post("/create-checkout-session", async (req, res) => {
 	const session = await stripe.checkout.sessions.create({
 		billing_address_collection: "auto",
 		customer_email: req.body.email,
+		metadata: {
+			_id: req.body._id,
+			},
 		line_items: [
 		{
 			price: prices.data[0].id,
@@ -185,9 +188,6 @@ router.post("/create-checkout-session", async (req, res) => {
 		mode: "subscription",
 		success_url: `${CLIENT_DOMAIN}/${req.body.username}?success=true&session_id={CHECKOUT_SESSION_ID}`,
 		cancel_url: `${CLIENT_DOMAIN}/${req.body.username}?canceled=true`,
-		metadata: {
-		_id: req.body._id,
-		},
 		automatic_tax: { enabled: true },
 	});
 	console.log(session);

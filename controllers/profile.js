@@ -77,6 +77,7 @@ const getProfile = async (req, res) => {
 				populate: [
 					{ path: 'blogs' },
 					{ path: 'articles' },
+					{ path: 'statements' },
 				]
 			})
 

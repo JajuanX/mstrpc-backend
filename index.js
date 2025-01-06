@@ -12,6 +12,7 @@ const openGraphRoute = require("./routes/openGraph");
 const musicRoute = require("./routes/music");
 const visitRoute = require("./routes/visit");
 const blogsRoute = require("./routes/blogs");
+const statementsRoute = require("./routes/statements");
 const stripeRoute = require("./routes/stripe");
 const profilesRoute = require("./routes/profiles");
 const emailsRoute = require("./routes/emails");
@@ -38,6 +39,7 @@ app.use("/opengraph", openGraphRoute);
 app.use("/music", musicRoute);
 app.use("/visits", visitRoute);
 app.use("/blogs", blogsRoute);
+app.use("/statements", statementsRoute);
 app.use("/emails", emailsRoute);
 
 connectToMongo()
