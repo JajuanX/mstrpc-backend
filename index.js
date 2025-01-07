@@ -16,7 +16,7 @@ const statementsRoute = require("./routes/statements");
 const stripeRoute = require("./routes/stripe");
 const profilesRoute = require("./routes/profiles");
 const emailsRoute = require("./routes/emails");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const PORT = process.env.PORT || 8080;
 
