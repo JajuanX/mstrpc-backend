@@ -1,13 +1,20 @@
-const express = require('express');
+import express from 'express';
+import {
+	getArticles,
+	createArticle,
+	updateArticle,
+	deleteArticle,
+	getArticle,
+} from '../controllers/articles.js';
+import authorize from '../middleware/authorize.js';
+
 const router = express.Router();
-const articlesController = require('../controllers/articles');
-const authorize = require("../middleware/authorize");
 
 // Routes
-router.get('/', articlesController.getArticles);
-router.post('/', authorize, articlesController.createArticle);
-router.put('/', authorize, articlesController.updateArticle);
-router.delete('/:id/:profileId', authorize, articlesController.deleteArticle);
-router.get('/:id', articlesController.getArticle);
+router.get('/', getArticles);
+router.post('/', authorize, createArticle);
+router.put('/', authorize, updateArticle);
+router.delete('/:id/:profileId', authorize, deleteArticle);
+router.get('/:id', getArticle);
 
-module.exports = router;
+export default router;

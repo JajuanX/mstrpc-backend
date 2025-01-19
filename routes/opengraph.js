@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import { getOpengraph } from '../controllers/opengraph.js';
+
 const router = express.Router();
-const openGraphController = require('../controllers/opengraph');
 
 // Routes
-router.post('/', openGraphController.getOpengraph);
+router.post('/', getOpengraph);
 
-module.exports = router;
+export default router;

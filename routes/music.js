@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';
+import { getSong } from '../controllers/music.js';
+import authorize from '../middleware/authorize.js';
+
 const router = express.Router();
-const musicController = require('../controllers/music');
-const authorize = require('../middleware/authorize')
 
 // Routes
-router.post('/', authorize, musicController.getSong);
+router.post('/', authorize, getSong);
 
-module.exports = router;
+export default router;

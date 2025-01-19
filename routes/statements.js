@@ -1,14 +1,22 @@
-const express = require('express');
+import express from 'express';
+import {
+	getStatements,
+	createStatement,
+	updateStatement,
+	deleteStatement,
+	getStatement,
+	getStatementsByUser,
+} from '../controllers/statements.js';
+import authorize from '../middleware/authorize.js';
+
 const router = express.Router();
-const statementsController = require('../controllers/statements');
-const authorize = require('../middleware/authorize');
 
 // Routes
-router.get('/', statementsController.getStatements);
-router.post('/',authorize, statementsController.createStatement);
-router.put('/', authorize, statementsController.updateStatement);
-router.delete('/:id', authorize, statementsController.deleteStatement);
-router.get('/:id', statementsController.getStatement);
-router.get('/:id/users/:userid', statementsController.getStatementsByUser);
+router.get('/', getStatements);
+router.post('/', authorize, createStatement);
+router.put('/', authorize, updateStatement);
+router.delete('/:id', authorize, deleteStatement);
+router.get('/:id', getStatement);
+router.get('/:id/users/:userid', getStatementsByUser);
 
-module.exports = router;
+export default router;

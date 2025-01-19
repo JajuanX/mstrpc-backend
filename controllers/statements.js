@@ -1,73 +1,77 @@
-const statementSchema = require('../models/statement');
-const profileSchema = require('../models/profile');
+import statementSchema from '../models/statement.js';
+import profileSchema from '../models/profile.js';
 
-const getStatements = async (_req, res) => {
+export const getStatements = async (_req, res) => {
 	try {
-		let response = await statementSchema.find({}).exec();
+		const response = await statementSchema.find({}).exec();
 		res.status(200).json(response);
 	} catch (error) {
-		res.status(500).send('Failed to retrieve all Blogs')
+		res.status(500).send('Failed to retrieve all statements');
 	}
 };
 
-const getStatementsByUser = async (req, res) => {
+export const getStatementsByUser = async (req, res) => {
+	const userId = req.params.userId;
+	try {
+		const response = await statementSchema.find({ user_id: userId }).exec();
+		res.status(200).json(response);
+	} catch (error) {
+		res.status(500).send('Failed to retrieve statements by user');
+	}
+};
 
-}
-
-const createStatement = async (req, res) => {
+export const createStatement = async (req, res) => {
 	console.log(req.body);
 	try {
 		const response = await statementSchema.create(req.body);
 		console.log(req.userInfo.profile);
 		await profileSchema.findByIdAndUpdate(
 			req.userInfo.profile,
-			{ $push: { statements: response._id } }, 
+			{ $push: { statements: response._id } },
 			{ new: true }
 		);
 		res.status(200).json(response);
 	} catch (err) {
-		console.log(err);
-		res.status(500).send("Failed to create article");
+		console.error(err);
+		res.status(500).send('Failed to create statement');
 	}
 };
 
-const getStatement = async (req, res) => {
+export const getStatement = async (req, res) => {
 	try {
-		const response = await statementSchema.findOne({_id: req.params.id}).populate({
-			path: 'user_id',
-			select: '-password'
-		}).exec();
+		const response = await statementSchema
+			.findOne({ _id: req.params.id })
+			.populate({
+				path: 'user_id',
+				select: '-password',
+			})
+			.exec();
 		res.status(200).json(response);
 	} catch (error) {
-		res.status(500).send("Failed to retrieve all Blogs");
+		res.status(500).send('Failed to retrieve the statement');
 	}
 };
 
-const updateStatement = async (req, res) => {
-	const statementId = req.params.id
+export const updateStatement = async (req, res) => {
+	const statementId = req.params.id;
 	try {
-		const response = await statementSchema.findOneAndUpdate({ _id: statementId }, req.body, {new: true});
+		const response = await statementSchema.findOneAndUpdate(
+			{ _id: statementId },
+			req.body,
+			{ new: true }
+		);
 		res.status(200).json(response);
 	} catch (err) {
-		res.status(500).send("Failed to update article");
+		res.status(500).send('Failed to update statement');
 	}
 };
 
-const deleteStatement = async (req, res) => {
-	const statementId = req.params.id
+export const deleteStatement = async (req, res) => {
+	const statementId = req.params.id;
 	try {
 		const response = await statementSchema.deleteOne({ _id: statementId });
 		res.status(200).json(response);
 	} catch (err) {
-		res.status(500).send("Failed to delete statement");
+		res.status(500).send('Failed to delete statement');
 	}
-};
-
-module.exports = {
-    createStatement,
-    getStatements,
-    getStatement,
-	updateStatement,
-	deleteStatement,
-	getStatementsByUser
 };

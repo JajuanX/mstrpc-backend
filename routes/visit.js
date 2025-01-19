@@ -1,12 +1,19 @@
-const express = require('express');
+import express from 'express';
+import {
+	recordVisit,
+	getVisits,
+	topVisitedPages,
+	getVisitByPeriod,
+	generateDummyData,
+} from '../controllers/visits.js';
+
 const router = express.Router();
-const visitController = require('../controllers/visits');
 
 // Routes
-router.get('/record/:userName', visitController.recordVisit);
-router.get('/:userName', visitController.getVisits);
-router.get('/analytics/top-performers', visitController.topVisitedPages);
-router.get('/analytics/:userName', visitController.getVisitByPeriod);
-router.get('/dummy/:records', visitController.generateDummyData);
+router.get('/record/:userName', recordVisit);
+router.get('/:userName', getVisits);
+router.get('/analytics/top-performers', topVisitedPages);
+router.get('/analytics/:userName', getVisitByPeriod);
+router.get('/dummy/:records', generateDummyData);
 
-module.exports = router;
+export default router;

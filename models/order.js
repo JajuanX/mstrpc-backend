@@ -1,12 +1,27 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const orderSchema = new mongoose.Schema({
-	amount: Number,
-	sessionId: String,
-	status: String,
-	paymentIntentId: String
-});
+const orderSchema = new mongoose.Schema(
+	{
+		amount: {
+			type: Number,
+			required: true,
+		},
+		sessionId: {
+			type: String,
+			required: true,
+		},
+		status: {
+			type: String,
+			required: true,
+		},
+		paymentIntentId: {
+			type: String,
+			required: true,
+		},
+	},
+	{ timestamps: true } // Adds createdAt and updatedAt timestamps
+);
 
 const Order = mongoose.model('Order', orderSchema);
 
-module.exports = Order;
+export default Order;

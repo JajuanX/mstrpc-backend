@@ -1,46 +1,58 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
-    name: {
-		firstName: { 
+const userSchema = new mongoose.Schema(
+	{
+		name: {
+			firstName: {
+				type: String,
+				required: true,
+			},
+			lastName: {
+				type: String,
+				required: true,
+			},
+		},
+		email: {
+			type: String,
+			unique: true,
+			required: true,
+		},
+		customer: {
+			type: String,
+		},
+		username: {
+			type: String,
+			unique: true,
+			required: true,
+		},
+		image_url: {
+			type: String,
+		},
+		password: {
 			type: String,
 			required: true,
 		},
-		lastName: { 
-			type: String,
-			required: true,
+		roles: {
+			type: [String], // Array of strings for clarity
+			default: [], // Default to an empty array
 		},
-    },
-    email: {
-		type: String,
-		unique: true,
-		required: true,
-    },
-	customer: String,
-    username: {
-		type: String,
-		unique: true,
-		required: true,
-    },
-    image_url: String,
-    password: {
-		type: String,
-		required: true,
-    },
-	roles: {
-		type: Array,
+		stripeId: {
+			type: String,
+		},
+		subscriptionStatus: {
+			type: String,
+		},
+		session_id: {
+			type: String,
+		},
+		profile: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'profile',
+		},
 	},
-	stripeId: String,
-	subscriptionStatus: String,
-	session_id: String,
-	profile: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "profile",
-	},
-
-},{ timestamps: true}
+	{ timestamps: true }
 );
 
-const User = mongoose.model("user", userSchema);
+const User = mongoose.model('user', userSchema);
 
-module.exports = User;
+export default User;

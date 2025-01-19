@@ -1,28 +1,29 @@
-require("dotenv").config();
-const ogs = require('open-graph-scraper');
+import dotenv from 'dotenv';
+import ogs from 'open-graph-scraper';
 
-const getOpengraph = async (req, res) => {
-	let data = null
-	let error = null
+dotenv.config();
+
+export const getOpengraph = async (req, res) => {
 	const options = { url: req.body.url };
-	ogs(options)
-		.then((response) => {
-			const { result } = response;
-			console.log(result);
-			data = {...result}
-			res.json({data, error})
-		})
-		.catch((err) => {
-			error = {
-				msg: 'Failed to retrieve OG Data',
-				err
-			}
-			res.status(400).json({
-				data, error
-			})
-		})
-	};
 
-module.exports = {
-    getOpengraph,
+	try {
+		const response = await ogs(options);
+		const { result } = response;
+		console.log(result);
+
+		res.json({
+			data: { ...result },
+			error: null,
+		});
+	} catch (err) {
+		console.error('Failed to retrieve OG Data:', err);
+
+		res.status(400).json({
+			data: null,
+			error: {
+				msg: 'Failed to retrieve OG Data',
+				err,
+			},
+		});
+	}
 };

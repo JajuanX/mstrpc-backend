@@ -1,27 +1,37 @@
-const authorize = require("../middleware/authorize");
-const visitor = require("../middleware/visitor");
-const createProfile = require("../middleware/createProfile");
-const express = require('express');
+import express from 'express';
+import authorize from '../middleware/authorize.js';
+import visitor from '../middleware/visitor.js';
+import createProfile from '../middleware/createProfile.js';
+import createCustomer from '../middleware/createCustomer.js';
+import {
+	currentUser,
+	createUser,
+	loginUser,
+	removeAdminRights,
+	updateUserAdminRights,
+	getUser,
+	editUser,
+	editUserProfile,
+	getUserProfile,
+	updateUserRelation,
+} from '../controllers/users.js';
+
 const router = express.Router();
-const usersController = require('../controllers/users');
-const createCustomer = require("../middleware/createCustomer");
 
-// This route is '/users'
-router.get('/current', authorize, usersController.currentUser);
-router.post('/register', createProfile, usersController.createUser);
-router.post('/login', usersController.loginUser);
+// Routes
+router.get('/current', authorize, currentUser);
+router.post('/register', createProfile, createUser);
+router.post('/login', loginUser);
 
-router.delete('/admin/:id', authorize, usersController.removeAdminRights);
-router.put('/admin/:id', authorize, usersController.updateUserAdminRights);
+router.delete('/admin/:id', authorize, removeAdminRights);
+router.put('/admin/:id', authorize, updateUserAdminRights);
 
-router.get('/:id', authorize, usersController.getUser);
-router.put('/:id/field', authorize, usersController.editUser);
+router.get('/:id', authorize, getUser);
+router.put('/:id/field', authorize, editUser);
 
-router.put('/profile/:id', authorize, usersController.editUserProfile);
-router.get('/profile/:username', visitor, usersController.getUserProfile);
+router.put('/profile/:id', authorize, editUserProfile);
+router.get('/profile/:username', visitor, getUserProfile);
 
-router.post('/relation', authorize, usersController.updateUserRelation);
+router.post('/relation', authorize, updateUserRelation);
 
-
-
-module.exports = router;
+export default router;

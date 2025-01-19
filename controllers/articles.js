@@ -1,71 +1,65 @@
-const articleSchema = require('../models/article')
-const profileSchema = require('../models/profile')
+import articleSchema from '../models/article.js';
+import profileSchema from '../models/profile.js';
 
-const getArticles = async (_req, res) => {
+export const getArticles = async (_req, res) => {
 	try {
-		let response = await articleSchema.find({}).exec();
+		const response = await articleSchema.find({}).exec();
 		res.status(200).json(response);
 	} catch (error) {
-		res.status(500).send('Failed to retrieve all articles')
+		res.status(500).send('Failed to retrieve all articles');
 	}
 };
 
-const createArticle = async (req, res) => {
+export const createArticle = async (req, res) => {
 	try {
 		const response = await articleSchema.create(req.body);
-		console.log();
 		await profileSchema.findByIdAndUpdate(
 			req.userInfo.profile,
-			{ $push: { articles: response._id } },  // Assuming 'articles' is an array of article IDs in the user schema
+			{ $push: { articles: response._id } }, // Assuming 'articles' is an array of article IDs in the user schema
 			{ new: true }
 		);
 		res.status(200).json(response);
 	} catch (err) {
 		console.log(err);
-		res.status(500).send("Failed to create article");
+		res.status(500).send('Failed to create article');
 	}
 };
 
-const getArticle = async (req, res) => {
+export const getArticle = async (req, res) => {
 	try {
-		const response = await articleSchema.findOne({_id: req.params.id}).exec();
+		const response = await articleSchema.findOne({ _id: req.params.id }).exec();
 		res.status(200).json(response);
 	} catch (error) {
-		res.status(500).send("Failed to retrieve all articles");
+		res.status(500).send('Failed to retrieve article');
 	}
 };
 
-const updateArticle = async (req, res) => {
-	const articleId = req.params.id
+export const updateArticle = async (req, res) => {
+	const articleId = req.params.id;
 	try {
-		const response = await articleSchema.findOneAndUpdate({ _id: articleId }, req.body, {new: true});
-		res.status(200).json(response);
-	} catch (err) {
-		res.status(500).send("Failed to update article");
-	}
-};
-
-const deleteArticle = async (req, res) => {
-	const articleId = req.params.id
-	const profileId = req.params.profileId
-	try {
-		const response = await articleSchema.deleteOne({ _id: articleId });
-		await profileSchema.findByIdAndUpdate(
-			profileId,
-			{ $pull: { articles: articleId } },  // Assuming 'articles' is an array of article IDs in the user schema
+		const response = await articleSchema.findOneAndUpdate(
+			{ _id: articleId },
+			req.body,
 			{ new: true }
 		);
 		res.status(200).json(response);
 	} catch (err) {
-		res.status(500).send("Failed to delete article");
+		res.status(500).send('Failed to update article');
 	}
 };
 
-
-module.exports = {
-    createArticle,
-    getArticles,
-    getArticle,
-	updateArticle,
-	deleteArticle,
+export const deleteArticle = async (req, res) => {
+	const articleId = req.params.id;
+	const profileId = req.params.profileId;
+	try {
+		const response = await articleSchema.deleteOne({ _id: articleId });
+		await profileSchema.findByIdAndUpdate(
+			profileId,
+			{ $pull: { articles: articleId } }, // Assuming 'articles' is an array of article IDs in the user schema
+			{ new: true }
+		);
+		res.status(200).json(response);
+	} catch (err) {
+		res.status(500).send('Failed to delete article');
+	}
 };

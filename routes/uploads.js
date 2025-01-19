@@ -1,9 +1,11 @@
-const express = require('express');
+import express from 'express';
+import { createUpload } from '../controllers/uploads.js';
+
 const router = express.Router();
-const uploadsController = require('../controllers/uploads');
 
 // Routes
-router.post('/', uploadsController.createUpload);
-// router.delete('/:id', uploadsController.deleteArticle);
+router.post('/', createUpload);
+// Uncomment and implement the delete route if needed
+// router.delete('/:id', deleteArticle);
 
-module.exports = router;
+export default router;

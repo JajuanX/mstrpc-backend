@@ -1,11 +1,14 @@
-const profileSchema = require("../models/profile");
+import profileSchema from '../models/profile.js';
 
-module.exports = async (req, res, next) => {
+const createProfile = async (req, res, next) => {
 	try {
-		const response = await profileSchema.create({});
-		req.profile = response;
-		next()
+		const profile = await profileSchema.create({});
+		req.profile = profile;
+		next();
 	} catch (err) {
-		res.status(500).send("Failed to create profile", err);
+		console.error('Error creating profile:', err);
+		res.status(500).send('Failed to create profile');
 	}
 };
+
+export default createProfile;

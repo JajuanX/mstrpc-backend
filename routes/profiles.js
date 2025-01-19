@@ -1,13 +1,20 @@
-const express = require('express');
+import express from 'express';
+import {
+	createProfile,
+	editProfile,
+	getRandomProfiles,
+	updateProfileRelation,
+	getProfile,
+} from '../controllers/profile.js';
+import authorize from '../middleware/authorize.js';
+
 const router = express.Router();
-const profilesController = require('../controllers/profile');
-const authorize = require("../middleware/authorize");
 
 // Routes
-router.post('/', authorize, profilesController.createProfile);
-router.put('/', authorize, profilesController.editProfile);
-router.get('/random', profilesController.getRandomProfiles);
-router.put('/relation', profilesController.updateProfileRelation);
-router.get('/:username', profilesController.getProfile);
+router.post('/', authorize, createProfile);
+router.put('/', authorize, editProfile);
+router.get('/random', getRandomProfiles);
+router.put('/relation', authorize, updateProfileRelation);
+router.get('/:username', getProfile);
 
-module.exports = router;
+export default router;

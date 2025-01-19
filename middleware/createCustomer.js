@@ -1,26 +1,29 @@
-const stripe = require("stripe")(
-	"sk_test_51Okqm4KnzwpcmEsu0WwsbFHzY9xwP7muMKWJcnk8vgyOYV6HawI2NrYSYUGf1kgvwJ5xXZdNHQFu4ZXo55lWQPNF00SSy21P2G"
-);
+import Stripe from 'stripe';
 
-module.exports = async (req, res, next) => {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+const createStripeCustomer = async (req, res, next) => {
 	const {
 		name: { firstName, lastName },
 		email,
-		username,
-		password,
-		image_url,
 	} = req.body;
 
+	if (!firstName || !lastName || !email) {
+		return res.status(400).send('Missing required fields: firstName, lastName, or email');
+	}
 
 	try {
 		const customer = await stripe.customers.create({
-			email: email,
+			email,
 			name: `${firstName} ${lastName}`,
 		});
-		req.stripe = customer
-		next()		
+
+		req.stripe = customer;
+		next();
 	} catch (err) {
-		console.log('Error creating customer:', err);
-		res.status(500).send("Failed to create stripe profile");
+		console.error('Error creating Stripe customer:', err);
+		res.status(500).send('Failed to create Stripe profile');
 	}
 };
+
+export default createStripeCustomer;
