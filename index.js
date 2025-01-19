@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import express from 'express';
 import morgan from 'morgan';
-import { urlencoded, json } from 'body-parser';
+import { urlencoded } from 'body-parser';
 import articlesRoute from './routes/articles.js';
 import usersRoute from './routes/users.js';
 import uploadsRoute from './routes/uploads.js';
@@ -49,7 +49,7 @@ app.use((req, res, next) => {
 // Middleware
 app.use(morgan('dev'));
 app.use(urlencoded({ extended: true }));
-app.use(json());
+app.use(express.json());
 app.use(express.static('public'));
 
 // MongoDB Connection
