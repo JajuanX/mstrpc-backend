@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import express from 'express';
 import morgan from 'morgan';
-import cors from 'cors';
 import { urlencoded, json } from 'body-parser';
 import articlesRoute from './routes/articles.js';
 import usersRoute from './routes/users.js';
@@ -22,8 +21,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// CORS Configuration Middleware
+app.use((req, res, next) => {
+	const allowedOrigins = [
+		'https://www.mstrpc.io',
+		'https://www.mstrpce.io',
+		'http://localhost:3000',
+		'http://127.0.0.1:3000',
+	];
+
+	const origin = req.headers.origin;
+	if (allowedOrigins.includes(origin)) {
+		res.setHeader('Access-Control-Allow-Origin', origin);
+	}
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+	res.setHeader('Access-Control-Allow-Credentials', 'true'); // Allow cookies if necessary
+
+	// Handle preflight request
+	if (req.method === 'OPTIONS') {
+		return res.sendStatus(204);
+	}
+
+	next();
+});
+
 // Middleware
-app.use(cors());
 app.use(morgan('dev'));
 app.use(urlencoded({ extended: true }));
 app.use(json());
