@@ -6,7 +6,7 @@ dotenv.config();
 const storefront = 'us'; // Example: 'us' for the United States
 const developerToken = process.env.APPLE_MUSIC_KEY; // Your developer token
 
-const searchAppleMusic = async (storefront, searchTerm) => {
+export const searchAppleMusic = async (storefront, searchTerm) => {
 	try {
 		const response = await axios.get(
 			`https://api.music.apple.com/v1/catalog/${storefront}/search`,

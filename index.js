@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import articlesRoute from './routes/articles.js';
 import usersRoute from './routes/users.js';
 import uploadsRoute from './routes/uploads.js';
-// import openGraphRoute from './routes/openGraph.js';
+import openGraphRoute from './routes/opengraph.js';
 import musicRoute from './routes/music.js';
 import visitRoute from './routes/visit.js';
 import blogsRoute from './routes/blogs.js';
@@ -13,37 +13,32 @@ import statementsRoute from './routes/statements.js';
 import stripeRoute from './routes/stripe.js';
 import profilesRoute from './routes/profiles.js';
 import emailsRoute from './routes/emails.js';
-// import stripe from 'stripe';
-
+import cors from 'cors';
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 // CORS Configuration Middleware
-app.use((req, res, next) => {
-	const allowedOrigins = [
-		'https://www.mstrpc.io',
-		'https://www.mstrpce.io',
-		'http://localhost:3000',
-		'http://127.0.0.1:3000',
-	];
-
-	const origin = req.headers.origin;
-	if (allowedOrigins.includes(origin)) {
-		res.setHeader('Access-Control-Allow-Origin', origin);
-	}
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-	res.setHeader('Access-Control-Allow-Credentials', 'true'); // Allow cookies if necessary
-
-	// Handle preflight request
-	if (req.method === 'OPTIONS') {
-		return res.sendStatus(204);
-	}
-
-	next();
-});
+const allowedOrigins = [
+	'https://www.mstrpc.io',
+	'https://www.mstrpce.io',
+	'http://localhost:5173',
+	'http://127.0.0.1:3000',
+];
+app.use(cors({
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error('Not allowed by CORS'));
+			}
+		},
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+		credentials: true, // Allow cookies if necessary
+	})
+);
 
 // Middleware
 app.use(morgan('dev'));
@@ -72,7 +67,7 @@ app.use('/articles', articlesRoute);
 app.use('/profiles', profilesRoute);
 app.use('/users', usersRoute);
 app.use('/uploads', uploadsRoute);
-// app.use('/opengraph', openGraphRoute);
+app.use('/opengraph', openGraphRoute);
 app.use('/music', musicRoute);
 app.use('/visits', visitRoute);
 app.use('/blogs', blogsRoute);
