@@ -16,6 +16,10 @@ const articleSchema = new mongoose.Schema(
 		description: {
 			type: String,
 		},
+		tag: {
+			type: String,
+			required: true,
+		},
 		user_id: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'user', // Corrected the reference to "user" (assuming this refers to a user model)
