@@ -21,15 +21,8 @@ export const getStatementsByUser = async (req, res) => {
 };
 
 export const createStatement = async (req, res) => {
-	console.log(req.body);
 	try {
 		const response = await statementSchema.create(req.body);
-		console.log(req.userInfo.profile);
-		await profileSchema.findByIdAndUpdate(
-			req.userInfo.profile,
-			{ $push: { statements: response._id } },
-			{ new: true }
-		);
 		res.status(200).json(response);
 	} catch (err) {
 		console.error(err);

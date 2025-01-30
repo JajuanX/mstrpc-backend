@@ -72,24 +72,6 @@ const profilesSchema = new mongoose.Schema(
 		music: {
 			type: String,
 		},
-		articles: [
-			{
-				type: mongoose.SchemaTypes.ObjectId,
-				ref: 'article',
-			},
-		],
-		blogs: [
-			{
-				type: mongoose.SchemaTypes.ObjectId,
-				ref: 'blog',
-			},
-		],
-		statements: [
-			{
-				type: mongoose.SchemaTypes.ObjectId,
-				ref: 'statement',
-			},
-		],
 		user_id: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'user',

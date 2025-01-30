@@ -13,6 +13,7 @@ import statementsRoute from './routes/statements.js';
 import stripeRoute from './routes/stripe.js';
 import profilesRoute from './routes/profiles.js';
 import emailsRoute from './routes/emails.js';
+import invitesRoute from './routes/invite.js';
 import cors from 'cors';
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use('/visits', visitRoute);
 app.use('/blogs', blogsRoute);
 app.use('/statements', statementsRoute);
 app.use('/emails', emailsRoute);
+app.use('/invite', invitesRoute);
 
 // Server Initialization
 connectToMongo().then(() => {

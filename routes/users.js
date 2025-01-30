@@ -2,7 +2,6 @@ import express from 'express';
 import authorize from '../middleware/authorize.js';
 import visitor from '../middleware/visitor.js';
 import createProfile from '../middleware/createProfile.js';
-import createCustomer from '../middleware/createCustomer.js';
 import {
 	currentUser,
 	createUser,
@@ -14,6 +13,7 @@ import {
 	editUserProfile,
 	getUserProfile,
 	updateUserRelation,
+	getUserArticles,
 } from '../controllers/users.js';
 
 const router = express.Router();
@@ -31,6 +31,9 @@ router.put('/:id/field', authorize, editUser);
 
 router.put('/profile/:id', authorize, editUserProfile);
 router.get('/profile/:username', visitor, getUserProfile);
+router.get('/:username/articles', getUserArticles);
+
+// router.get('/invite', authorize, invitations)
 
 router.post('/relation', authorize, updateUserRelation);
 

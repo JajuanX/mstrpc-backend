@@ -13,11 +13,6 @@ export const getArticles = async (_req, res) => {
 export const createArticle = async (req, res) => {
 	try {
 		const response = await articleSchema.create(req.body);
-		await profileSchema.findByIdAndUpdate(
-			req.userInfo.profile,
-			{ $push: { articles: response._id } }, // Assuming 'articles' is an array of article IDs in the user schema
-			{ new: true }
-		);
 		res.status(200).json(response);
 	} catch (err) {
 		console.log(err);

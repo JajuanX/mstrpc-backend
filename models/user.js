@@ -49,6 +49,15 @@ const userSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'profile',
 		},
+		invitedBy: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'user', // Reference to the user who sent the invite
+			default: null,
+		},
+		inviteTokenUsed: {
+			type: String, // Token used during registration
+			default: null,
+		},
 	},
 	{ timestamps: true }
 );

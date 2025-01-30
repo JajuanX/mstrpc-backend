@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import profileSchema from '../models/profile.js';
 import userSchema from '../models/user.js';
+import statementSchema from '../models/statement.js';
+import articleSchema from '../models/article.js';
 
 dotenv.config();
 
@@ -73,33 +75,47 @@ export const editProfile = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-	console.log(req.params);
-	try {
-		let user = await userSchema
-			.findOne({ username: req.params.username })
-			.populate({
-				path: 'profile',
-				populate: [
-					{ path: 'blogs' },
-					{ path: 'articles' },
-					{ path: 'statements' },
-				],
-			});
+    console.log(req.params);
+    try {
+        let user = await userSchema
+            .findOne({ username: req.params.username })
+            .populate({
+                path: 'profile',
+            });
 
-		if (!user) {
-			res.status(404).json({ error: 'Could not find profile' });
-			return;
-		}
+        if (!user) {
+            res.status(404).json({ error: 'Could not find profile' });
+            return;
+        }
 
-		user = user.toObject();
-		res.status(200).json({
-			...user.profile,
-			user_id: user._id,
-		});
-	} catch (error) {
-		res.status(404).send('Failed to get profile');
-	}
+		console.log('here=======================');
+		
+        // Retrieve the most recent statement for the user
+        const recentStatement = await statementSchema
+            .findOne({ user_id: user._id }) // Filter by user ID
+            .sort({ createdAt: -1 }) // Sort by creation date in descending order
+            .limit(1); // Get only the most recent
+
+		const articles = await articleSchema
+			.find({ user_id: user._id }) // Filter by user ID
+			.sort({ createdAt: 1 }); // Sort by creation date (descending)
+
+		console.log(recentStatement);
+		
+        user = user.toObject();
+
+        res.status(200).json({
+            ...user.profile,
+            user_id: user._id,
+            statement: recentStatement,
+			articles: articles, // Include the most recent statement
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to get profile');
+    }
 };
+
 
 export const updateProfileRelation = async (req, res) => {
 	const { id, field } = req.body;

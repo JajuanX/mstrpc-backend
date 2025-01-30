@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userSchema from '../models/user.js';
+import articleSchema from '../models/article.js';
 
 dotenv.config();
 
@@ -203,4 +204,38 @@ export const updateUserRelation = async (req, res) => {
 	} catch (err) {
 		res.status(404).send('Failed to update user relation');
 	}
+};
+
+
+export const getUserArticles = async (req, res) => {
+    try {
+		let user = await userSchema
+			.findOne({ username: req.params.username });
+
+        const page = parseInt(req.query.page) || 1; // Default to page 1
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 articles per page
+        const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+        // Retrieve paginated articles
+        const articles = await articleSchema
+            .find({ user_id: user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent first
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // Get total article count
+        const totalArticles = await articleSchema.countDocuments();
+
+        res.status(200).json({
+            page,
+            limit,
+            totalArticles,
+            totalPages: Math.ceil(totalArticles / limit),
+            articles,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to retrieve articles');
+    }
 };
