@@ -1,35 +1,47 @@
 import visitSchema from '../models/visit.js';
 import faker from 'faker';
+import crypto from 'crypto';
+
+const SECRET_KEY = 'champion'; // Change this, keep it private!
+
+const hashIP = (ip) => {
+    return crypto.createHmac('sha256', SECRET_KEY).update(ip).digest('hex');
+};
 
 export const recordVisit = async (req, res) => {
-	const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
-	const user = req.params.userName;
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
+    let ip = req.headers['x-forwarded-for'] || req.ip;
+    if (ip.includes(',')) ip = ip.split(',')[0]; // Handle multiple forwarded IPs
+    if (ip === '::1') ip = '127.0.0.1'; // Normalize localhost
 
-	try {
-		const visitExists = await visitSchema.findOne({
-			ipAddress: ip,
-			visitDate: { $gte: today },
-			page: user,
-		});
+    const hashedIP = hashIP(ip); // Hash the IP before storing
+    const user = req.params.userName;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-		if (!visitExists) {
-			const newVisit = new visitSchema({
-				ipAddress: ip,
-				page: user,
-				visitDate: new Date(),
-			});
-			await newVisit.save();
-			res.status(200).send('Successfully logged visit');
-			return;
-		}
+    try {
+        const visitExists = await visitSchema.findOne({
+            ipAddress: hashedIP, // Compare with hashed IP
+            visitDate: { $gte: today, $lt: new Date(today.getTime() + 86400000) }, 
+            page: user,
+        });
 
-		res.status(200).send('User previously visited');
-	} catch (err) {
-		console.error('Error recording visit:', err);
-		res.status(500).send('Failed to record visit');
-	}
+        if (!visitExists) {
+            const newVisit = new visitSchema({
+                ipAddress: hashedIP, // Store hashed IP
+                page: user,
+                visitDate: new Date(),
+            });
+            await newVisit.save();
+            res.status(200).send('Successfully logged visit');
+            return;
+        }
+
+        res.status(200).send('User previously visited');
+    } catch (err) {
+        console.error('Error recording visit:', err);
+        res.status(500).send('Failed to record visit');
+    }
 };
 
 export const getVisits = async (req, res) => {
