@@ -1,8 +1,10 @@
 import visitSchema from '../models/visit.js';
 import faker from 'faker';
 import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const SECRET_KEY = 'champion'; // Change this, keep it private!
+const SECRET_KEY = process.env.JWT_KEY; // Change this, keep it private!
 
 const hashIP = (ip) => {
     return crypto.createHmac('sha256', SECRET_KEY).update(ip).digest('hex');
