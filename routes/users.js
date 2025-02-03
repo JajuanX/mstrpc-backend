@@ -13,7 +13,8 @@ import {
 	editUserProfile,
 	getUserProfile,
 	updateUserRelation,
-	getUserArticles,
+	getUserStatementsPagination,
+	getUserArticlesPagination,
 } from '../controllers/users.js';
 
 const router = express.Router();
@@ -31,7 +32,8 @@ router.put('/:id/field', authorize, editUser);
 
 router.put('/profile/:id', authorize, editUserProfile);
 router.get('/profile/:username', visitor, getUserProfile);
-router.get('/:username/articles', getUserArticles);
+router.get('/:username/articles', getUserArticlesPagination);
+router.get('/:username/statements', getUserStatementsPagination);
 
 // router.get('/invite', authorize, invitations)
 

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userSchema from '../models/user.js';
 import articleSchema from '../models/article.js';
+import statementSchema from '../models/statement.js';
 
 dotenv.config();
 
@@ -207,7 +208,7 @@ export const updateUserRelation = async (req, res) => {
 };
 
 
-export const getUserArticles = async (req, res) => {
+export const getUserArticlesPagination = async (req, res) => {
     try {
 		let user = await userSchema
 			.findOne({ username: req.params.username });
@@ -225,7 +226,7 @@ export const getUserArticles = async (req, res) => {
             .exec();
 
         // Get total article count
-        const totalArticles = await articleSchema.countDocuments();
+        const totalArticles = await articleSchema.countDocuments({ user_id: user._id });
 
         res.status(200).json({
             page,
@@ -237,5 +238,41 @@ export const getUserArticles = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('Failed to retrieve articles');
+    }
+};
+
+export const getUserStatementsPagination = async (req, res) => {
+    try {
+		let user = await userSchema
+			.findOne({ username: req.params.username });
+
+        const page = parseInt(req.query.page) || 1; // Default to page 1
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 articles per page
+        const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+        // Retrieve paginated articles
+		console.log(user._id);
+		
+        const statements = await statementSchema
+            .find({ user_id: user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent first
+            .skip(skip)
+            .limit(limit)
+            .exec();
+		console.log(statements);
+		
+        // Get total article count
+        const totalStatements = await statementSchema.countDocuments({ user_id: user._id });
+
+        res.status(200).json({
+            page,
+            limit,
+            totalStatements,
+            totalPages: Math.ceil(totalStatements / limit),
+            statements,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to retrieve statements');
     }
 };

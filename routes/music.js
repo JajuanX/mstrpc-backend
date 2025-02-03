@@ -1,5 +1,5 @@
 import express from 'express';
-import { getSong,  } from '../controllers/music.js';
+import { getSong  } from '../controllers/music.js';
 import authorize from '../middleware/authorize.js';
 
 const router = express.Router();
