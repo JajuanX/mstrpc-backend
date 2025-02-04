@@ -47,75 +47,80 @@ export const recordVisit = async (req, res) => {
 };
 
 export const getVisits = async (req, res) => {
-	const user = req.params.userName;
-	try {
-		const visits = await visitSchema.find({ page: user }).distinct('ipAddress');
-		res.json({ uniqueVisits: visits.length });
-	} catch (err) {
-		console.error('Error fetching visits:', err);
-		res.status(500).send('Failed to fetch visits');
-	}
+    const user = req.params.userName;
+    try {
+        const visits = await visitSchema.find({ page: user }).distinct('ipAddress');
+        res.json({ uniqueVisits: visits.length });
+    } catch (err) {
+        console.error('Error fetching visits:', err);
+        res.status(500).send('Failed to fetch visits');
+    }
 };
 
 const getStartOfPeriod = (period) => {
-	const now = new Date();
-	if (period === 'daily') {
-		now.setHours(0, 0, 0, 0);
-	} else if (period === 'weekly') {
-		const day = now.getDay();
-		const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Week starts on Monday
-		now.setDate(diff);
-		now.setHours(0, 0, 0, 0);
-	} else if (period === 'monthly') {
-		now.setDate(1);
-		now.setHours(0, 0, 0, 0);
-	} else if (period === 'yearly') {
-		now.setMonth(0, 1); // January 1st
-		now.setHours(0, 0, 0, 0);
-	}
-	return now;
+    const now = new Date();
+    if (period === 'daily') {
+        now.setHours(0, 0, 0, 0);
+    } else if (period === 'weekly') {
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Week starts on Monday
+        now.setDate(diff);
+        now.setHours(0, 0, 0, 0);
+    } else if (period === 'monthly') {
+        now.setDate(1);
+        now.setHours(0, 0, 0, 0);
+    } else if (period === 'yearly') {
+        now.setMonth(0, 1); // January 1st
+        now.setHours(0, 0, 0, 0);
+    }
+    return now;
 };
 
 export const getVisitByPeriod = async (req, res) => {
-	const page = req.params.userName;
+    const page = req.params.userName;
 
-	try {
-		const visits = await visitSchema.aggregate([
-			{ $match: { page } },
-			{
-				$facet: {
-					daily: [
-						{ $match: { visitDate: { $gte: getStartOfPeriod('daily') } } },
-						{ $group: { _id: null, count: { $sum: 1 } } },
-					],
-					weekly: [
-						{ $match: { visitDate: { $gte: getStartOfPeriod('weekly') } } },
-						{ $group: { _id: null, count: { $sum: 1 } } },
-					],
-					monthly: [
-						{ $match: { visitDate: { $gte: getStartOfPeriod('monthly') } } },
-						{ $group: { _id: null, count: { $sum: 1 } } },
-					],
-					yearly: [
-						{ $match: { visitDate: { $gte: getStartOfPeriod('yearly') } } },
-						{ $group: { _id: null, count: { $sum: 1 } } },
-					],
-				},
-			},
-		]);
+    try {
+        const visits = await visitSchema.aggregate([
+            { $match: { page } }, // Match visits for the requested page
+            {
+                $facet: {
+                    daily: [
+                        { $match: { visitDate: { $gte: getStartOfPeriod('daily') } } },
+                        { $group: { _id: "$ipAddress" } }, // Group by unique hashed IP
+                        { $count: "count" },
+                    ],
+                    weekly: [
+                        { $match: { visitDate: { $gte: getStartOfPeriod('weekly') } } },
+                        { $group: { _id: "$ipAddress" } },
+                        { $count: "count" },
+                    ],
+                    monthly: [
+                        { $match: { visitDate: { $gte: getStartOfPeriod('monthly') } } },
+                        { $group: { _id: "$ipAddress" } },
+                        { $count: "count" },
+                    ],
+                    yearly: [
+                        { $match: { visitDate: { $gte: getStartOfPeriod('yearly') } } },
+                        { $group: { _id: "$ipAddress" } },
+                        { $count: "count" },
+                    ],
+                },
+            },
+        ]);
 
-		const counts = {
-			daily: visits[0].daily[0]?.count || 0,
-			weekly: visits[0].weekly[0]?.count || 0,
-			monthly: visits[0].monthly[0]?.count || 0,
-			yearly: visits[0].yearly[0]?.count || 0,
-		};
+        // Extract counts, ensuring we don’t return undefined values
+        const counts = {
+            daily: visits[0].daily[0]?.count || 0,
+            weekly: visits[0].weekly[0]?.count || 0,
+            monthly: visits[0].monthly[0]?.count || 0,
+            yearly: visits[0].yearly[0]?.count || 0,
+        };
 
-		res.json(counts);
-	} catch (err) {
-		console.error('Error fetching visit data by period:', err);
-		res.status(500).send('Failed to fetch visit data');
-	}
+        res.json(counts);
+    } catch (err) {
+        console.error('Error fetching visit data by period:', err);
+        res.status(500).send('Failed to fetch visit data');
+    }
 };
 
 export const generateDummyData = async (req, res) => {
@@ -151,7 +156,8 @@ export const topVisitedPages = async (_req, res) => {
 
 		const visits = await visitSchema.aggregate([
 			{ $match: { visitDate: { $gte: yesterday, $lt: today } } },
-			{ $group: { _id: '$page', count: { $sum: 1 } } },
+			{ $group: { _id: { page: '$page', ip: '$ipAddress' } } }, // Unique visitors per page
+			{ $group: { _id: '$_id.page', count: { $sum: 1 } } }, // Count unique visitors per page
 			{ $sort: { count: -1 } },
 			{ $limit: 5 },
 		]);

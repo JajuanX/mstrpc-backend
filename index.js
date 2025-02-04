@@ -36,8 +36,8 @@ app.use(cors({
 			}
 		},
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-		allowedHeaders: ['Content-Type', 'Authorization'],
-		credentials: true, // Allow cookies if necessary
+		allowedHeaders: ['Content-Type', 'Authorization', 'Set-Cookie'],
+		credentials: 'include', 
 	})
 );
 
