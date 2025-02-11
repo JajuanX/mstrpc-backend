@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-	getArticles,
+	getArticlesPagination,
 	createArticle,
 	updateArticle,
 	deleteArticle,
@@ -11,7 +11,7 @@ import authorize from '../middleware/authorize.js';
 const router = express.Router();
 
 // Routes
-router.get('/', getArticles);
+router.get('/', getArticlesPagination);
 router.post('/', authorize, createArticle);
 router.put('/', authorize, updateArticle);
 router.delete('/:id/:profileId', authorize, deleteArticle);

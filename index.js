@@ -14,6 +14,7 @@ import stripeRoute from './routes/stripe.js';
 import profilesRoute from './routes/profiles.js';
 import emailsRoute from './routes/emails.js';
 import invitesRoute from './routes/invite.js';
+import tagsRoute from './routes/tags.js';
 import cors from 'cors';
 dotenv.config();
 
@@ -75,6 +76,7 @@ app.use('/blogs', blogsRoute);
 app.use('/statements', statementsRoute);
 app.use('/emails', emailsRoute);
 app.use('/invite', invitesRoute);
+app.use('/tags', tagsRoute);
 
 // Server Initialization
 connectToMongo().then(() => {
