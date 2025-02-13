@@ -168,3 +168,26 @@ export const topVisitedPages = async (_req, res) => {
 		res.status(500).send('Failed to fetch top visited pages');
 	}
 };
+
+export const getTotalViews = async (_req, res) => {
+    try {
+        const dailyStart = getStartOfPeriod('daily');
+        const monthlyStart = getStartOfPeriod('monthly');
+        const yearlyStart = getStartOfPeriod('yearly');
+
+        const [dailyViews, monthlyViews, yearlyViews] = await Promise.all([
+            visitSchema.countDocuments({ visitDate: { $gte: dailyStart } }),
+            visitSchema.countDocuments({ visitDate: { $gte: monthlyStart } }),
+            visitSchema.countDocuments({ visitDate: { $gte: yearlyStart } }),
+        ]);
+
+        res.json({
+            daily: dailyViews,
+            monthly: monthlyViews,
+            yearly: yearlyViews,
+        });
+    } catch (err) {
+        console.error('Error fetching total views:', err);
+        res.status(500).send('Failed to fetch total views');
+    }
+};

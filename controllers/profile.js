@@ -55,7 +55,6 @@ export const getRandomProfiles = async (_req, res) => {
 };
 
 export const editProfile = async (req, res) => {
-	console.log('here');
 	const currentUser = req.user;
 	const updateFields = req.body;
 
@@ -75,7 +74,6 @@ export const editProfile = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-    console.log(req.params);
     try {
         let user = await userSchema
             .findOne({ username: req.params.username })
@@ -99,8 +97,6 @@ export const getProfile = async (req, res) => {
 		const articles = await articleSchema
 			.find({ user_id: user._id }) // Filter by user ID
 			.sort({ createdAt: 1 }); // Sort by creation date (descending)
-
-		console.log(recentStatement);
 		
         user = user.toObject();
 

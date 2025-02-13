@@ -5,11 +5,13 @@ import {
 	topVisitedPages,
 	getVisitByPeriod,
 	generateDummyData,
+	getTotalViews,
 } from '../controllers/visits.js';
 
 const router = express.Router();
 
 // Routes
+router.get('/total', getTotalViews);
 router.get('/record/:userName', recordVisit);
 router.get('/:userName', getVisits);
 router.get('/analytics/top-performers', topVisitedPages);
