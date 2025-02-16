@@ -49,12 +49,36 @@ export const getArticle = async (req, res) => {
 export const editArticle = async (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
-	
+
     try {
-        const updatedArticle = await articleSchema.findByIdAndUpdate(id, updatedData, { new: true });
-        if (!updatedArticle) {
+        const existingArticle = await articleSchema.findById(id);
+        if (!existingArticle) {
             return res.status(404).json({ message: "Article not found" });
         }
+
+        const oldTag = existingArticle.tag;
+        const newTag = updatedData.tag;
+
+        // Update the article
+        const updatedArticle = await articleSchema.findByIdAndUpdate(id, updatedData, { new: true });
+
+        // Update tag counts if the tag has changed
+        if (oldTag !== newTag) {
+            if (oldTag) {
+                await tagsSchema.updateOne(
+                    { tag: oldTag },
+                    { $inc: { count: -1 } }
+                );
+            }
+            if (newTag) {
+                await tagsSchema.updateOne(
+                    { tag: newTag },
+                    { $inc: { count: 1 } },
+                    { upsert: true, setDefaultsOnInsert: true }
+                );
+            }
+        }
+
         res.json(updatedArticle);
     } catch (error) {
         console.error('Error updating article:', error);
