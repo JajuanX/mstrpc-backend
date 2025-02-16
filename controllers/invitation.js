@@ -5,7 +5,7 @@ import sgMail from '@sendgrid/mail';
 export const getInvites = async (req, res) => {
 	try {
 		const response = await Invitation
-			.find({ _id: req.params.userId })
+			.find({ invitedBy: req.user.id })
 			.exec();
 		res.status(200).json(response);
 	} catch (error) {
@@ -13,13 +13,69 @@ export const getInvites = async (req, res) => {
 	}
 };
 
+export const deleteInviteIfUnused = async (req, res) => {
+	try {
+		const { inviteToken } = req.params;
+		console.log(req.params);
+
+		// Check if the user from the token is present
+		const userId = req.user.id;
+		if (!userId) {
+			return res.status(403).json({ message: 'User ID not found in token' });
+		}
+
+		// Find the invitation by token
+		const invitation = await Invitation.findOne({ inviteToken });
+		console.log(invitation);
+
+		// Check if the invitation exists and is unused
+		if (!invitation) {
+			return res.status(404).json({ message: 'Invitation not found' });
+		}
+
+		if (invitation.isUsed) {
+			return res.status(400).json({ message: 'Cannot delete a used invitation' });
+		}
+
+		// Verify the user has permission to delete the invitation
+		if (invitation.invitedBy.toString() !== userId) {
+			return res.status(403).json({ message: 'You are not authorized to delete this invitation' });
+		}
+
+		// Delete the unused invitation
+		await Invitation.deleteOne({ inviteToken });
+		return res.status(200).json({ message: 'Invitation deleted successfully' });
+	} catch (error) {
+		console.error('Error deleting invitation:', error);
+		return res.status(500).json({ message: 'Failed to delete the invitation', error: error.message });
+	}
+};
+
 export async function generateInviteToken(req, res) {
 	try {
-		const { email, userId } = req.body;
+		// Extract user ID from the token
+		const userId = req.user.id;
+		if (!userId) {
+			return res.status(403).json({ message: 'User ID not found in token' });
+		}
+
+		const { email } = req.body;
 
 		// Validate inputs
-		if (!email || !userId) {
-			return res.status(400).json({ message: 'Email and userId are required' });
+		if (!email) {
+			return res.status(400).json({ message: 'Email is required' });
+		}
+
+		// Check if the email has already been invited
+		const existingInvite = await Invitation.findOne({ email });
+		if (existingInvite) {
+			return res.status(400).json({ message: 'This email has already been invited' });
+		}
+
+		// Check how many invites the user has sent
+		const inviteCount = await Invitation.countDocuments({ invitedBy: userId });
+		if (inviteCount >= 5) {
+			return res.status(400).json({ message: 'You have reached the maximum number of invites allowed' });
 		}
 
 		// Generate a unique invite token
@@ -39,7 +95,7 @@ export async function generateInviteToken(req, res) {
 		// Compose the email message
 		const msg = {
 			to: email,
-			from: 'admin@mstrpc.io', // Make sure this email is verified
+			from: 'admin@mstrpc.io',
 			subject: 'Welcome to MSTRPC Beta',
 			text: `Hello ${email},\n\nWe're excited to invite you to join our exclusive platform! Use the invite token below to complete your registration:\n\n${inviteToken}\n\nVisit: https://mstrpc.io/signup\n\nBest,\nThe MSTRPC.io Team`,
 			html: `
@@ -62,7 +118,7 @@ export async function generateInviteToken(req, res) {
 				<body>
 					<div class="container">
 						<div class="header">
-							<h1>Welcome to MSTRPC.io!</h1>
+							<h1>Welcome to MSTRPC!</h1>
 						</div>
 						<div class="content">
 							<p>Hello ${email},</p>
@@ -79,8 +135,7 @@ export async function generateInviteToken(req, res) {
 						</div>
 					</div>
 				</body>
-				</html>
-			`,
+				</html>`
 		};
 
 		// Send the email
@@ -93,3 +148,4 @@ export async function generateInviteToken(req, res) {
 		res.status(500).json({ message: 'Failed to generate invite token', error: error.message });
 	}
 }
+

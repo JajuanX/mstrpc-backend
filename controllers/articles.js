@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import articleSchema from '../models/article.js';
-import profileSchema from '../models/profile.js';
 import tagsSchema from '../models/tags.js';
 
 export const getArticles = async (_req, res) => {
