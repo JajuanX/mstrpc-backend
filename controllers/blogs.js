@@ -21,7 +21,6 @@ export const getBlogsByUser = async (req, res) => {
 };
 
 export const createBlog = async (req, res) => {
-	console.log(req.body);
 	try {
 		const response = await blogSchema.create(req.body);
 		await profileSchema.findByIdAndUpdate(
@@ -31,7 +30,7 @@ export const createBlog = async (req, res) => {
 		);
 		res.status(200).json(response);
 	} catch (err) {
-		console.log(err);
+		console.error(err);
 		res.status(500).send('Failed to create blog');
 	}
 };

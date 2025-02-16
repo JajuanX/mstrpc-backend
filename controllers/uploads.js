@@ -20,7 +20,6 @@ export const createUpload = async (req, res) => {
 
 	try {
 		const response = await client.send(command);
-		console.log(response);
 		res.json(response);
 	} catch (err) {
 		console.error('Error uploading to S3:', err);

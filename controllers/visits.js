@@ -138,7 +138,6 @@ export const generateDummyData = async (req, res) => {
 		}
 
 		res.send(`Generated ${recordsToFake} dummy records.`);
-		console.log(`Generated ${recordsToFake} dummy records.`);
 	} catch (err) {
 		console.error('Error generating dummy data:', err);
 		res.status(500).send('Failed to generate dummy data');

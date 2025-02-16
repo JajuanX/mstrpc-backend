@@ -75,7 +75,7 @@ app.use('/visits', visitRoute);
 app.use('/blogs', blogsRoute);
 app.use('/statements', statementsRoute);
 app.use('/emails', emailsRoute);
-app.use('/invite', invitesRoute);
+app.use('/invites', invitesRoute);
 app.use('/tags', tagsRoute);
 
 // Server Initialization

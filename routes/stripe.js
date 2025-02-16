@@ -105,7 +105,7 @@ router.post(
 					break;
 
 				default:
-					console.log(`Unhandled event type ${event.type}.`);
+					console.error(`Unhandled event type ${event.type}.`);
 			}
 
 			res.status(200).send('success');

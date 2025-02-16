@@ -7,7 +7,6 @@ import articleSchema from '../models/article.js';
 dotenv.config();
 
 export const createProfile = async (req, res) => {
-	console.log(req.body);
 	try {
 		const response = await profileSchema.create(req.body);
 		res.status(200).json(response);
@@ -65,7 +64,6 @@ export const editProfile = async (req, res) => {
 			{ $set: updateFields },
 			{ new: true, upsert: true }
 		);
-		console.log(response);
 		res.status(200).json({ result: 'Successfully updated user profile' });
 	} catch (err) {
 		console.error(err);
@@ -85,8 +83,6 @@ export const getProfile = async (req, res) => {
             res.status(404).json({ error: 'Could not find profile' });
             return;
         }
-
-		console.log('here=======================');
 		
         // Retrieve the most recent statement for the user
         const recentStatement = await statementSchema
@@ -115,14 +111,12 @@ export const getProfile = async (req, res) => {
 
 export const updateProfileRelation = async (req, res) => {
 	const { id, field } = req.body;
-	console.log(field);
 	try {
 		const user = await profileSchema.findOneAndUpdate(
 			{ _id: id },
 			{ $push: { [`profile.${field}`]: id } },
 			{ new: true }
 		);
-		console.log(user);
 		if (user) {
 			res.status(200).json(user);
 		}

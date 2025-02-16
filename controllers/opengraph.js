@@ -9,7 +9,6 @@ export const getOpengraph = async (req, res) => {
 	try {
 		const response = await ogs(options);
 		const { result } = response;
-		console.log(result);
 
 		res.json({
 			data: { ...result },

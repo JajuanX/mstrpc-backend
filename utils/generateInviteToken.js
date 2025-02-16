@@ -10,3 +10,5 @@ async function generateInviteToken(userId, email) {
 	await invitation.save();
 	return inviteToken;
 }
+
+export default generateInviteToken;

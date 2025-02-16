@@ -25,9 +25,6 @@ const userSchema = new mongoose.Schema(
 			unique: true,
 			required: true,
 		},
-		image_url: {
-			type: String,
-		},
 		password: {
 			type: String,
 			required: true,

@@ -4,33 +4,27 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-	host: 'smtp.office365.com',
+	host: 'smtp.gmail.com',
 	port: 587,
-	secure: false, 
+	secure: false, // false for STARTTLS
 	auth: {
-		user: "admin@mstrpc.io",
-		pass: process.env.LIVE_EMAIL,
+		user: 'mstrpcmail@gmail.com',
+		pass: process.env.GMAIL_APP_PASSWORD, // Must use App Password, not regular password
+	},
+	tls: {
+		rejectUnauthorized: false, // Bypass self-signed certificate issues if needed
 	},
 });
-
 async function sendMail(message, to, subject) {
 	// send mail with defined transport object
 	const info = await transporter.sendMail({
-		from: '"Jajuan @MSTRPC" <admin@mstrpc.io>', // sender address
+		from: 'mstrpcmail@gmail.com', // sender address
 		to: to, // list of receivers
 		subject: subject, // Subject line
 		html: message, // html body
 	});
 
-	console.log("Message sent: %s", info.messageId);
+	console.info("Message sent: %s", info.messageId);
 }
 
 export default sendMail;
-
-// {
-// 	from: '"Maddison Foo Koch 👻" <admin@mstrpc.io>', // sender address
-// 	to: "bar@example.com, baz@example.com", // list of receivers
-// 	subject: "Hello ✔", // Subject line
-// 	text: "Hello world?", // plain text body
-// 	html: "<b>Hello world?</b>", // html body
-// }

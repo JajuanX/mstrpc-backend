@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
 
 	try {
 		await sgMail.send(msg);
-		console.log('Email sent successfully');
+		console.info('Email sent successfully');
 		res.status(200).send('Success');
 	} catch (error) {
 		console.error('Error sending email:', error);

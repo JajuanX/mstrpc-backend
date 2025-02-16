@@ -29,8 +29,6 @@ const authenticate = async (req, res, next) => {
 
 		delete user.password; // Remove sensitive data from the user object
 		req.userInfo = user;
-
-		console.log('Authenticated user info:', req.userInfo);
 		next();
 	} catch (err) {
 		console.error('JWT verification error:', err);

@@ -37,7 +37,7 @@ export const getSong = async (req, res) => {
 			res.status(500).send('Error retrieving song data from Apple Music API');
 		}
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		
 		res.status(500).send('An unexpected error occurred');
 	}

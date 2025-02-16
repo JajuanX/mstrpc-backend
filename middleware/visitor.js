@@ -19,7 +19,6 @@ const recordVisitMiddleware = async (req, res, next) => {
 				visitDate: new Date(),
 			});
 			await newVisit.save();
-			console.log(`New visit recorded for user: ${user}, IP: ${ip}`);
 		}
 
 		next();

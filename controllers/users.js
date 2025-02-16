@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import userSchema from '../models/user.js';
 import articleSchema from '../models/article.js';
 import statementSchema from '../models/statement.js';
-
+import inviteSchema from '../models/invitation.js';
 dotenv.config();
 
 export const createUser = async (req, res) => {
@@ -13,11 +13,16 @@ export const createUser = async (req, res) => {
 		email,
 		username,
 		password,
-		image_url,
+		inviteToken,
 	} = req.body;
 
-	if (!firstName || !lastName || !email || !password || !username || !image_url) {
+	if (!firstName || !lastName || !email || !password || !username || !inviteToken) {
 		return res.status(400).send('Please enter the required fields.');
+	}
+
+	const invitation = await inviteSchema.findOne({ inviteToken, isUsed: false });
+	if (!invitation) {
+		throw new Error('Invalid or expired invite token');
 	}
 
 	const hashedPassword = bcrypt.hashSync(password);
@@ -26,13 +31,17 @@ export const createUser = async (req, res) => {
 		name: { firstName, lastName },
 		email,
 		username,
-		image_url,
+		inviteTokenUsed: inviteToken,
 		password: hashedPassword,
 		profile: req.profile._id,
 	};
 
 	try {
 		const response = await userSchema.create(newUser);
+
+		invitation.isUsed = true;
+		await invitation.save();
+
 		res.status(200).json(response);
 	} catch (error) {
 		console.error(error);
@@ -249,9 +258,6 @@ export const getUserStatementsPagination = async (req, res) => {
         const page = parseInt(req.query.page) || 1; // Default to page 1
         const limit = parseInt(req.query.limit) || 10; // Default to 10 articles per page
         const skip = (page - 1) * limit; // Calculate the number of documents to skip
-
-        // Retrieve paginated articles
-		console.log(user._id);
 		
         const statements = await statementSchema
             .find({ user_id: user._id })
@@ -259,7 +265,6 @@ export const getUserStatementsPagination = async (req, res) => {
             .skip(skip)
             .limit(limit)
             .exec();
-		console.log(statements);
 		
         // Get total article count
         const totalStatements = await statementSchema.countDocuments({ user_id: user._id });

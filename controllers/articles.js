@@ -13,28 +13,22 @@ export const getArticles = async (_req, res) => {
 };
 
 export const createArticle = async (req, res) => {
-	console.log(req.body);
     try {
         const { tag } = req.body; // Assuming a single tag is passed
 
-        // Create the article
         const response = await articleSchema.create(req.body);
 
-        // Update tag count if tag exists
         if (tag) {
-            const response = await tagsSchema.updateOne(
+            await tagsSchema.updateOne(
                 { tag },
                 { $inc: { count: 1 } }, 
                 { upsert: true, setDefaultsOnInsert: true } 
-            );
-
-			console.log(response);
-			
+            );			
         }
 
         res.status(200).json(response);
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send('Failed to create article');
     }
 };
@@ -55,7 +49,6 @@ export const getArticle = async (req, res) => {
 export const editArticle = async (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
-	console.log('===========',id);
 	
     try {
         const updatedArticle = await articleSchema.findByIdAndUpdate(id, updatedData, { new: true });
@@ -96,18 +89,26 @@ export const deleteArticle = async (req, res) => {
 
         const id = new mongoose.Types.ObjectId(article.user_id);
 
-        if (id.toString() === profileId) {
-            const response = await articleSchema.deleteOne({ _id: articleId }); // Use articleId here, not id
-            return res.status(200).json(response);
+        if (id.toString() !== profileId) {
+            return res.status(400).send('Not your profile');
         }
 
-        // If profileId doesn't match
-        return res.status(400).send('Not your profile');
+        const response = await articleSchema.deleteOne({ _id: articleId });
+
+        if (article.tag) {
+            await tagsSchema.updateOne(
+                { tag: article.tag },
+                { $inc: { count: -1 } }
+            );
+        }
+
+        return res.status(200).json(response);
     } catch (err) {
         console.error(err);
         return res.status(500).send('Failed to delete article');
     }
 };
+
 
 
 export const getArticlesPagination = async (req, res) => {
@@ -122,8 +123,6 @@ export const getArticlesPagination = async (req, res) => {
             filter.tag = tag;
         }
 
-        console.log(filter);
-
         const articles = await articleSchema.find(filter)
             .populate('user_id', 'name username image_url') // Populating relevant fields
             .sort({ createdAt: -1 })
@@ -131,7 +130,6 @@ export const getArticlesPagination = async (req, res) => {
             .limit(limit)
             .exec();
 
-        // Rename user_id to user in the response
         const formattedArticles = articles.map(article => {
             const articleObj = article.toObject(); // Convert Mongoose document to plain JS object
             articleObj.user = articleObj.user_id;  // Assign user_id data to user key
