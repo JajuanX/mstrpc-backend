@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import articleSchema from '../models/article.js';
 import tagsSchema from '../models/tags.js';
+import profilesSchema from '../models/profile.js';
 
 export const getArticles = async (_req, res) => {
 	try {
@@ -13,9 +14,9 @@ export const getArticles = async (_req, res) => {
 
 export const createArticle = async (req, res) => {
     try {
-        const { tag } = req.body; // Assuming a single tag is passed
+        const { tag, profile_id } = req.body; // Include profile_id
 
-        const response = await articleSchema.create(req.body);
+        const response = await articleSchema.create({ ...req.body, profile_id });
 
         if (tag) {
             await tagsSchema.updateOne(
@@ -132,8 +133,6 @@ export const deleteArticle = async (req, res) => {
     }
 };
 
-
-
 export const getArticlesPagination = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -147,16 +146,21 @@ export const getArticlesPagination = async (req, res) => {
         }
 
         const articles = await articleSchema.find(filter)
-            .populate('user_id', 'name username image_url') // Populating relevant fields
+            .populate('user_id', 'name username') // Only populate user_id with name and username
+            .populate('profile_id', 'image_url') // Populate profile_id with image_url
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .exec();
 
         const formattedArticles = articles.map(article => {
-            const articleObj = article.toObject(); // Convert Mongoose document to plain JS object
-            articleObj.user = articleObj.user_id;  // Assign user_id data to user key
-            delete articleObj.user_id;             // Remove the original user_id key
+            const articleObj = article.toObject();
+            articleObj.user = {
+                ...articleObj.user_id,
+                image_url: articleObj.profile_id?.image_url || null
+            };
+            delete articleObj.user_id;
+            delete articleObj.profile_id;
             return articleObj;
         });
 

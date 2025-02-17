@@ -22,7 +22,12 @@ const articleSchema = new mongoose.Schema(
 		},
 		user_id: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: 'user', // Corrected the reference to "user" (assuming this refers to a user model)
+			ref: 'user',
+			required: true,
+		},
+		profile_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'profile',
 			required: true,
 		},
 	},
