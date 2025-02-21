@@ -15,6 +15,7 @@ import {
 	updateUserRelation,
 	getUserStatementsPagination,
 	getUserArticlesPagination,
+	getUsers,
 } from '../controllers/users.js';
 
 const router = express.Router();
@@ -23,6 +24,7 @@ const router = express.Router();
 router.get('/current', authorize, currentUser);
 router.post('/register', createProfile, createUser);
 router.post('/login', loginUser);
+router.get('/', getUsers);
 
 router.delete('/admin/:id', authorize, removeAdminRights);
 router.put('/admin/:id', authorize, updateUserAdminRights);

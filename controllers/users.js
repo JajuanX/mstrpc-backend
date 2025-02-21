@@ -5,7 +5,10 @@ import userSchema from '../models/user.js';
 import articleSchema from '../models/article.js';
 import statementSchema from '../models/statement.js';
 import inviteSchema from '../models/invitation.js';
+import sgMail from '@sendgrid/mail';
+import crypto from 'crypto';
 dotenv.config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const createUser = async (req, res) => {
 	const {
@@ -41,6 +44,17 @@ export const createUser = async (req, res) => {
 
 		invitation.isUsed = true;
 		await invitation.save();
+
+		// Send email notification using SendGrid
+		const msg = {
+			to: 'jjjjjj2121@gmail.com', // your email address
+			from: 'admin@mstrpc.io',			
+			subject: 'Cha Ching!! New User Created',
+			text: `A new user has been created:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nUsername: ${username}`,
+		};
+
+		await sgMail.send(msg);
+		console.info('New user notification email sent.');
 
 		res.status(200).json(response);
 	} catch (error) {
@@ -281,3 +295,71 @@ export const getUserStatementsPagination = async (req, res) => {
         res.status(500).send('Failed to retrieve statements');
     }
 };
+
+export const getUsers = async (_req, res) => {
+    try {
+        const users = await userSchema.find({})
+            .populate({
+                path: 'profile',
+                select: 'image_url'
+            })
+            .select('username profile')
+            .exec();
+
+
+        const formattedUsers = users.filter((user) => user.profile?.image_url ).map(user => {			
+			if(user.profile?.image_url) {
+				return {
+					id: crypto.randomUUID(),
+					username: user.username,
+					image_url: user.profile?.image_url
+				}
+			}
+        });
+
+        res.status(200).json(formattedUsers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to retrieve users');
+    }
+};
+
+// export const getUsersWithPagination = async (req, res) => {
+//     try {
+//         const page = parseInt(req.query.page) || 1; // Default to page 1
+//         const limit = parseInt(req.query.limit) || 10; // Default to 10 users per page
+//         const skip = (page - 1) * limit;
+
+//         // Fetch users with pagination, only selecting username and image_url from profile
+//         const users = await userSchema.find()
+//             .populate({
+//                 path: 'profile',
+//                 select: 'image_url'
+//             })
+//             .select('username profile')
+//             .skip(skip)
+//             .limit(limit)
+//             .exec();
+
+//         // Get total user count
+//         const totalUsers = await userSchema.countDocuments();
+
+//         // Transform the result to only include username and image_url
+//         const formattedUsers = users.map(user => ({
+// 			id: crypto.randomUUID(),
+//             username: user.username,
+//             image_url: user.profile?.image_url || null
+//         }));
+
+//         res.status(200).json({
+//             page,
+//             limit,
+//             totalUsers,
+//             totalPages: Math.ceil(totalUsers / limit),
+//             users: formattedUsers,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Failed to retrieve users');
+//     }
+// };
