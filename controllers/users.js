@@ -64,31 +64,34 @@ export const createUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
-	const { email, password } = req.body;
+    const { email, password } = req.body;
 
-	if (!email || !password) {
-		return res.status(400).send('Please enter the required fields');
-	}
+    if (!email || !password) {
+        return res.status(400).send('Please enter the required fields');
+    }
 
-	const user = await userSchema.findOne({ email }).exec();
+    const user = await userSchema.findOne({ email }).exec();
 
-	if (!user) {
-		return res.status(400).send('Invalid email');
-	}
+    if (!user) {
+        return res.status(400).send('Invalid email');
+    }
 
-	const isPasswordCorrect = bcrypt.compareSync(password, user.password);
-	if (!isPasswordCorrect) {
-		return res.status(400).send('Invalid password');
-	}
+    const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+    if (!isPasswordCorrect) {
+        return res.status(400).send('Invalid password');
+    }
 
-	const token = jwt.sign(
-		{ id: user.id, email: user.email, roles: user.roles },
-		process.env.JWT_KEY,
-		{ expiresIn: '24h' }
-	);
+    const expiresIn = 24 * 60 * 60; // 24 hours in seconds
 
-	res.json({ token });
+    const token = jwt.sign(
+        { id: user.id, email: user.email, roles: user.roles },
+        process.env.JWT_KEY,
+        { expiresIn }
+    );
+
+    res.json({ token, expires_in: expiresIn }); // Include expires_in in the response
 };
+
 
 export const updateUserAdminRights = async (req, res) => {
 	const { email, role } = req.body;
