@@ -4,18 +4,18 @@ import sgMail from '@sendgrid/mail';
 
 export const getInvites = async (req, res) => {
 
-	
+
 	try {
 		const response = await Invitation
-		.find({ invitedBy: req.user.id })
-		.exec();
+			.find({ invitedBy: req.user.id })
+			.exec();
 		console.log(response);
-		
-		if(req.user?.roles.includes('admin')) {
-			return res.status(200).json({invites: [...response], isAdmin: true})
+
+		if (req.user?.roles.includes('admin')) {
+			return res.status(200).json({ invites: [...response], isAdmin: true })
 		}
 
-		return res.status(200).json({invites: [...response], isAdmin: false});
+		return res.status(200).json({ invites: [...response], isAdmin: false });
 	} catch (error) {
 		res.status(500).send('Failed to retrieve the Invites');
 	}
@@ -82,7 +82,7 @@ export async function generateInviteToken(req, res) {
 
 		// Check how many invites the user has sent
 		const inviteCount = await Invitation.countDocuments({ invitedBy: userId });
-		if (inviteCount >= 5) {
+		if (inviteCount >= 5 && !req.user?.roles.includes('admin')) {
 			return res.status(400).json({ message: 'You have reached the maximum number of invites allowed' });
 		}
 
