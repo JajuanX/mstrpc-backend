@@ -3,11 +3,19 @@ import Invitation from '../models/invitation.js';
 import sgMail from '@sendgrid/mail';
 
 export const getInvites = async (req, res) => {
+
+	
 	try {
 		const response = await Invitation
-			.find({ invitedBy: req.user.id })
-			.exec();
-		res.status(200).json(response);
+		.find({ invitedBy: req.user.id })
+		.exec();
+		console.log(response);
+		
+		if(req.user?.roles.includes('admin')) {
+			return res.status(200).json({invites: [...response], isAdmin: true})
+		}
+
+		return res.status(200).json({invites: [...response], isAdmin: false});
 	} catch (error) {
 		res.status(500).send('Failed to retrieve the Invites');
 	}
