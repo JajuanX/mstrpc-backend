@@ -99,6 +99,7 @@ export const getProfile = async (req, res) => {
         res.status(200).json({
             ...user.profile,
             user_id: user._id,
+			username: user.username, // Add the username here
             statement: recentStatement,
 			articles: articles, // Include the most recent statement
         });
