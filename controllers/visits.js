@@ -2,6 +2,7 @@ import visitSchema from '../models/visit.js';
 import faker from 'faker';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import Profile from '../models/profile.js';
 dotenv.config();
 
 const SECRET_KEY = process.env.JWT_KEY; // Change this, keep it private!
@@ -174,16 +175,18 @@ export const getTotalViews = async (_req, res) => {
         const monthlyStart = getStartOfPeriod('monthly');
         const yearlyStart = getStartOfPeriod('yearly');
 
-        const [dailyViews, monthlyViews, yearlyViews] = await Promise.all([
+        const [dailyViews, monthlyViews, yearlyViews, totalProfiles] = await Promise.all([
             visitSchema.countDocuments({ visitDate: { $gte: dailyStart } }),
             visitSchema.countDocuments({ visitDate: { $gte: monthlyStart } }),
             visitSchema.countDocuments({ visitDate: { $gte: yearlyStart } }),
+            Profile.countDocuments({}),
         ]);
 
         res.json({
             daily: dailyViews,
             monthly: monthlyViews,
             yearly: yearlyViews,
+            totalProfiles: totalProfiles,
         });
     } catch (err) {
         console.error('Error fetching total views:', err);
