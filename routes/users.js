@@ -16,29 +16,31 @@ import {
 	getUserStatementsPagination,
 	getUserArticlesPagination,
 	getUsers,
+	forgotPassword,
+	resetPassword,
 } from '../controllers/users.js';
 
 const router = express.Router();
 
-// Routes
-router.get('/current', authorize, currentUser);
 router.post('/register', createProfile, createUser);
 router.post('/login', loginUser);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+
+router.get('/current', authorize, currentUser);
 router.get('/', getUsers);
+router.post('/relation', authorize, updateUserRelation);
 
-router.delete('/admin/:id', authorize, removeAdminRights);
 router.put('/admin/:id', authorize, updateUserAdminRights);
-
-router.get('/:id', authorize, getUser);
-router.put('/:id/field', authorize, editUser);
+router.delete('/admin/:id', authorize, removeAdminRights);
 
 router.put('/profile/:id', authorize, editUserProfile);
 router.get('/profile/:username', visitor, getUserProfile);
+
 router.get('/:username/articles', getUserArticlesPagination);
 router.get('/:username/statements', getUserStatementsPagination);
 
-// router.get('/invite', authorize, invitations)
-
-router.post('/relation', authorize, updateUserRelation);
+router.get('/:id', authorize, getUser);
+router.put('/:id/field', authorize, editUser);
 
 export default router;

@@ -368,6 +368,103 @@ export const deleteUser = async (req, res) => {
 	}
 };
 
+
+export const resetPassword = async (req, res) => {
+	const { token, newPassword } = req.body;
+
+	try {
+		const user = await userSchema.findOne({
+			resetPasswordToken: token,
+			resetPasswordExpires: { $gt: Date.now() }, // Ensure token is not expired
+		});
+
+		if (!user) {
+			return res.status(400).json({ message: "Invalid or expired token" });
+		}
+
+		// Hash new password
+		const hashedPassword = bcrypt.hashSync(newPassword, 10);
+
+		// Update user password and remove reset token fields
+		user.password = hashedPassword;
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpires = undefined;
+
+		await user.save();
+
+		res.json({ message: "Password has been reset successfully" });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
+export const forgotPassword = async (req, res) => {
+	const { email } = req.body;
+	
+	try {
+		const user = await userSchema.findOne({ email });
+		
+		if (!user) {
+			return res.status(400).json({ message: "User not found" });
+		}
+
+		// Generate token
+		const resetToken = crypto.randomBytes(32).toString('hex');
+		const resetTokenExpiry = Date.now() + 60 * 60 * 1000; // Token expires in 1 hour
+
+		user.resetPasswordToken = resetToken;
+		user.resetPasswordExpires = resetTokenExpiry;
+		await user.save();
+
+		// Send password reset email
+		const resetLink = `https://mstrpc.io/reset-password/${resetToken}`;
+
+		const msg = {
+			to: user.email,
+			from: 'admin@mstrpc.io',
+			subject: 'Password Reset Request',
+			text: `You requested a password reset. Click the link below to reset your password: ${resetLink} This link is valid for 1 hour.`,
+			html: `
+				<div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+					<div style="max-width: 600px; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);">
+						<h2 style="color: #333;">Password Reset Request</h2>
+						<p style="color: #555;">Hello,</p>
+						<p style="color: #555;">
+							You recently requested to reset your password. Click the button below to proceed:
+						</p>
+						<div style="text-align: center; margin: 20px 0;">
+							<a href="${resetLink}" 
+								style="display: inline-block; background-color: #F95C19; color: #fff; padding: 12px 20px; text-decoration: none; font-weight: bold; border-radius: 5px;">
+								Reset Your Password
+							</a>
+						</div>
+						<p style="color: #555;">
+							If you did not request this, please ignore this email. This link is valid for <strong>1 hour</strong>.
+						</p>
+						<hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0;">
+						<p style="color: #777; font-size: 12px; text-align: center;">
+							If the button above doesn't work, copy and paste the following link in your browser:<br>
+							<a href="${resetLink}" style="color: #F95C19;">${resetLink}</a>
+						</p>
+						<p style="color: #777; font-size: 12px; text-align: center;">&copy; 2025 MSTRPC. All rights reserved.</p>
+					</div>
+				</div>
+			`
+		};
+
+
+		await sgMail.send(msg);
+
+		res.json({ message: "Password reset email sent!" });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
+
+
 // export const getUsersWithPagination = async (req, res) => {
 //     try {
 //         const page = parseInt(req.query.page) || 1; // Default to page 1

@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import Profile from '../models/profile.js';
 dotenv.config();
 
-const SECRET_KEY = process.env.JWT_KEY; // Change this, keep it private!
+const SECRET_KEY = process.env.JWT_KEY; 
 
 const hashIP = (ip) => {
     return crypto.createHmac('sha256', SECRET_KEY).update(ip).digest('hex');
@@ -13,10 +13,10 @@ const hashIP = (ip) => {
 
 export const recordVisit = async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.ip;
-    if (ip.includes(',')) ip = ip.split(',')[0]; // Handle multiple forwarded IPs
-    if (ip === '::1') ip = '127.0.0.1'; // Normalize localhost
+    if (ip.includes(',')) ip = ip.split(',')[0]; 
+    if (ip === '::1') ip = '127.0.0.1'; 
 
-    const hashedIP = hashIP(ip); // Hash the IP before storing
+    const hashedIP = hashIP(ip);
     const user = req.params.userName;
     
     const today = new Date();
@@ -24,14 +24,14 @@ export const recordVisit = async (req, res) => {
 
     try {
         const visitExists = await visitSchema.findOne({
-            ipAddress: hashedIP, // Compare with hashed IP
+            ipAddress: hashedIP, 
             visitDate: { $gte: today, $lt: new Date(today.getTime() + 86400000) }, 
             page: user,
         });
 
         if (!visitExists) {
             const newVisit = new visitSchema({
-                ipAddress: hashedIP, // Store hashed IP
+                ipAddress: hashedIP,
                 page: user,
                 visitDate: new Date(),
             });
@@ -64,7 +64,7 @@ const getStartOfPeriod = (period) => {
         now.setHours(0, 0, 0, 0);
     } else if (period === 'weekly') {
         const day = now.getDay();
-        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Week starts on Monday
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1); 
         now.setDate(diff);
         now.setHours(0, 0, 0, 0);
     } else if (period === 'monthly') {
@@ -82,12 +82,12 @@ export const getVisitByPeriod = async (req, res) => {
 
     try {
         const visits = await visitSchema.aggregate([
-            { $match: { page } }, // Match visits for the requested page
+            { $match: { page } },
             {
                 $facet: {
                     daily: [
                         { $match: { visitDate: { $gte: getStartOfPeriod('daily') } } },
-                        { $group: { _id: "$ipAddress" } }, // Group by unique hashed IP
+                        { $group: { _id: "$ipAddress" } }, 
                         { $count: "count" },
                     ],
                     weekly: [
@@ -109,7 +109,6 @@ export const getVisitByPeriod = async (req, res) => {
             },
         ]);
 
-        // Extract counts, ensuring we don’t return undefined values
         const counts = {
             daily: visits[0].daily[0]?.count || 0,
             weekly: visits[0].weekly[0]?.count || 0,
@@ -156,8 +155,8 @@ export const topVisitedPages = async (_req, res) => {
 
 		const visits = await visitSchema.aggregate([
 			{ $match: { visitDate: { $gte: yesterday, $lt: today } } },
-			{ $group: { _id: { page: '$page', ip: '$ipAddress' } } }, // Unique visitors per page
-			{ $group: { _id: '$_id.page', count: { $sum: 1 } } }, // Count unique visitors per page
+			{ $group: { _id: { page: '$page', ip: '$ipAddress' } } }, 
+			{ $group: { _id: '$_id.page', count: { $sum: 1 } } }, 
 			{ $sort: { count: -1 } },
 			{ $limit: 5 },
 		]);
