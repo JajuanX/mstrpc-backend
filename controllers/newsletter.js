@@ -7,33 +7,34 @@ dotenv.config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendNewsletter = async () => {
+const sendNewsletter = async (req, res) => {
 	try {
-		// Get today's articles
+		// Get today's date boundaries
 		const now = new Date();
 		const startOfToday = new Date(now.setHours(0, 0, 0, 0));
 		const endOfToday = new Date(now.setHours(23, 59, 59, 999));
 
+		// Find the top 10 articles today sorted by rankingScore (highest first)
 		const articles = await Article.find({
 			createdAt: { $gte: startOfToday, $lte: endOfToday },
 		})
-			.sort({ createdAt: -1 })
+			.sort({ rankingScore: -1 })
 			.limit(10);
 
 		if (articles.length === 0) {
 			console.log('No articles today. Skipping email.');
-			return;
+			return res.status(200).json({ message: 'No articles today. Skipping email.' });
 		}
 
-		// Get all users
+		// Get all users (only select email and firstName)
 		const users = await User.find({}, 'email name.firstName');
 
 		if (users.length === 0) {
 			console.log('No users found to send the newsletter.');
-			return;
+			return res.status(200).json({ message: 'No users found to send the newsletter.' });
 		}
 
-		// Format the article content
+		// Format the article content into a list
 		const articleList = articles
 			.map(
 				(article, index) =>
@@ -50,7 +51,7 @@ const sendNewsletter = async () => {
 			)
 			.join('');
 
-		// Loop through each user and send a unique email
+		// Loop through each user and send the newsletter
 		for (const user of users) {
 			const emailContent = `
 				<!DOCTYPE html>
@@ -104,8 +105,8 @@ const sendNewsletter = async () => {
 			`;
 
 			const msg = {
-				to: user.email, // Each user gets their own email
-				from: 'admin@mstrpc.io', // Your verified sender email
+				to: user.email,
+				from: 'admin@mstrpc.io',
 				subject: `📢 ${user.name.firstName}, Here’s Today’s Latest Links!`,
 				html: emailContent,
 			};
@@ -115,10 +116,11 @@ const sendNewsletter = async () => {
 		}
 
 		console.log('All newsletters sent successfully!');
+		return res.status(200).json({ message: 'All newsletters sent successfully!' });
 	} catch (error) {
 		console.error('Error sending newsletter:', error.response?.body || error);
+		return res.status(500).json({ message: 'Error sending newsletter', error: error.response?.body || error });
 	}
 };
-
 
 export default sendNewsletter;

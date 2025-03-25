@@ -30,6 +30,14 @@ const articleSchema = new mongoose.Schema(
 			ref: 'profile',
 			required: true,
 		},
+		upvotes: {
+			type: Number,
+			default: 0,
+		},
+		rankingScore: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{ timestamps: true }
 );

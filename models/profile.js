@@ -6,6 +6,10 @@ const profilesSchema = new mongoose.Schema(
 		image_url: {
 			type: String,
 		},
+		top_five: {
+			type: String,
+			default: '',
+		},
 		image: {
 			url: {
 				type: String,

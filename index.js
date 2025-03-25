@@ -15,32 +15,33 @@ import profilesRoute from './routes/profiles.js';
 import emailsRoute from './routes/emails.js';
 import invitesRoute from './routes/invite.js';
 import tagsRoute from './routes/tags.js';
+import subscribersRoute from './routes/subscribers.js';
+import votesRoute from './routes/votes.js';
 import cors from 'cors';
+import './utils/scheduler.js';
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// CORS Configuration Middleware
-const allowedOrigins = [
-	'https://www.mstrpc.io',
-	'https://www.mstrpce.io',
-	'http://localhost:5173',
-	'http://127.0.0.1:3000',
-];
+const isDev = process.env.NODE_ENV === 'development';
+
+const allowedOrigins = isDev
+	? ['http://localhost:5173', 'http://127.0.0.1:3000']
+	: ['https://www.mstrpc.io', 'https://www.mstrpce.io'];
+
 app.use(cors({
-		origin: (origin, callback) => {
-			if (!origin || allowedOrigins.includes(origin)) {
-				callback(null, true);
-			} else {
-				callback(new Error('Not allowed by CORS'));
-			}
-		},
-		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-		allowedHeaders: ['Content-Type', 'Authorization', 'Set-Cookie'],
-		credentials: 'include', 
-	})
-);
+	origin: (origin, callback) => {
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error('Not allowed by CORS'));
+		}
+	},
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization', 'Set-Cookie'],
+	credentials: true,
+}));
 
 // Middleware
 app.use(morgan('dev'));
@@ -77,6 +78,8 @@ app.use('/statements', statementsRoute);
 app.use('/emails', emailsRoute);
 app.use('/invites', invitesRoute);
 app.use('/tags', tagsRoute);
+app.use('/subscribers', subscribersRoute);
+app.use('/votes', votesRoute);
 
 // Server Initialization
 connectToMongo().then(() => {

@@ -5,6 +5,8 @@ import {
 	editArticle,
 	deleteArticle,
 	getArticle,
+	upvoteArticle,
+	removeVoteArticle
 } from '../controllers/articles.js';
 import authorize from '../middleware/authorize.js';
 
@@ -16,5 +18,7 @@ router.post('/', authorize, createArticle);
 router.put('/:id', authorize, editArticle);
 router.delete('/:id/:profileId', authorize, deleteArticle);
 router.get('/:id', getArticle);
+router.put('/:id/upvote', authorize, upvoteArticle);
+router.put('/:id/remove-vote', authorize, removeVoteArticle);
 
 export default router;

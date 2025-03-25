@@ -11,35 +11,36 @@ dotenv.config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const createUser = async (req, res) => {
-	const {
-		name: { firstName, lastName },
-		email,
-		username,
-		password,
-		inviteToken,
-	} = req.body;
-
-	if (!firstName || !lastName || !email || !password || !username || !inviteToken) {
-		return res.status(400).send('Please enter the required fields.');
-	}
-
-	const invitation = await inviteSchema.findOne({ inviteToken, isUsed: false });
-	if (!invitation) {
-		throw new Error('Invalid or expired invite token');
-	}
-
-	const hashedPassword = bcrypt.hashSync(password);
-
-	const newUser = {
-		name: { firstName, lastName },
-		email,
-		username,
-		inviteTokenUsed: inviteToken,
-		password: hashedPassword,
-		profile: req.profile._id,
-	};
-
 	try {
+		const {
+			name: { firstName, lastName },
+			email,
+			username,
+			password,
+			inviteToken,
+		} = req.body;
+
+		if (!firstName || !lastName || !email || !password || !username || !inviteToken) {
+			return res.status(400).send('Please enter the required fields.');
+		}
+
+		const invitation = await inviteSchema.findOne({ inviteToken, isUsed: false });
+
+		if (!invitation) {
+			return res.status(400).json({ message: 'Invalid or expired invite token' });
+		}
+
+		const hashedPassword = bcrypt.hashSync(password);
+
+		const newUser = {
+			name: { firstName, lastName },
+			email,
+			username,
+			inviteTokenUsed: inviteToken,
+			password: hashedPassword,
+			profile: req.profile?._id, // Just in case req.profile is undefined
+		};
+
 		const response = await userSchema.create(newUser);
 
 		invitation.isUsed = true;
@@ -47,7 +48,7 @@ export const createUser = async (req, res) => {
 
 		// Send email notification using SendGrid
 		const msg = {
-			to: 'jjjjjj2121@gmail.com', // your email address
+			to: 'jjjjjj2121@gmail.com',
 			from: 'admin@mstrpc.io',
 			subject: 'Cha Ching!! New User Created',
 			text: `A new user has been created:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nUsername: ${username}`,
@@ -57,11 +58,13 @@ export const createUser = async (req, res) => {
 		console.info('New user notification email sent.');
 
 		res.status(200).json(response);
+
 	} catch (error) {
-		console.error(error);
+		console.error('Error in createUser:', error);
 		res.status(500).json({ error: 'Failed to Register.' });
 	}
 };
+
 
 export const loginUser = async (req, res) => {
 	const { email, password } = req.body;

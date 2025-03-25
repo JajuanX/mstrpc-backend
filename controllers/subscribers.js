@@ -1,4 +1,4 @@
-import Subscriber from '../models/subscriber';
+import Subscriber from '../models/subscriber.js';
 import { createObjectCsvStringifier } from 'csv-writer';
 
 // ✅ Get paginated subscribers
@@ -28,10 +28,10 @@ export const addSubscriber = async (req, res) => {
 		const { email } = req.body;
 		if (!email) return res.status(400).json({ error: 'Email is required' });
 
-		const existing = await Subscriber.findOne({ userId: req.user.id, email });
+		const existing = await Subscriber.findOne({ userId: req.body.userId, email });
 		if (existing) return res.status(400).json({ error: 'Subscriber already exists' });
 
-		const newSubscriber = new Subscriber({ userId: req.user.id, email });
+		const newSubscriber = new Subscriber({ userId: req.body.userId, email });
 		await newSubscriber.save();
 
 		res.json({ message: 'Subscriber added', subscriber: newSubscriber });
