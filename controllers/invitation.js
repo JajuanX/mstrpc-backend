@@ -9,7 +9,6 @@ export const getInvites = async (req, res) => {
 		const response = await Invitation
 			.find({ invitedBy: req.user.id })
 			.exec();
-		console.log(response);
 
 		if (req.user?.roles.includes('admin')) {
 			return res.status(200).json({ invites: [...response], isAdmin: true })
@@ -24,7 +23,6 @@ export const getInvites = async (req, res) => {
 export const deleteInviteIfUnused = async (req, res) => {
 	try {
 		const { inviteToken } = req.params;
-		console.log(req.params);
 
 		// Check if the user from the token is present
 		const userId = req.user.id;
@@ -34,7 +32,6 @@ export const deleteInviteIfUnused = async (req, res) => {
 
 		// Find the invitation by token
 		const invitation = await Invitation.findOne({ inviteToken });
-		console.log(invitation);
 
 		// Check if the invitation exists and is unused
 		if (!invitation) {
@@ -148,7 +145,7 @@ export async function generateInviteToken(req, res) {
 
 		// Send the email
 		await sgMail.send(msg);
-		console.log('Email sent successfully');
+		console.info('Email sent successfully');
 
 		res.status(200).json({ message: 'Invitation sent successfully', inviteToken });
 	} catch (error) {

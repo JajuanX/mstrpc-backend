@@ -22,7 +22,7 @@ const sendNewsletter = async (req, res) => {
 			.limit(10);
 
 		if (articles.length === 0) {
-			console.log('No articles today. Skipping email.');
+			console.info('No articles today. Skipping email.');
 			return res.status(200).json({ message: 'No articles today. Skipping email.' });
 		}
 
@@ -30,7 +30,7 @@ const sendNewsletter = async (req, res) => {
 		const users = await User.find({}, 'email name.firstName');
 
 		if (users.length === 0) {
-			console.log('No users found to send the newsletter.');
+			console.info('No users found to send the newsletter.');
 			return res.status(200).json({ message: 'No users found to send the newsletter.' });
 		}
 
@@ -112,10 +112,10 @@ const sendNewsletter = async (req, res) => {
 			};
 
 			await sgMail.send(msg);
-			console.log(`Newsletter sent to ${user.email}`);
+			console.info(`Newsletter sent to ${user.email}`);
 		}
 
-		console.log('All newsletters sent successfully!');
+		console.info('All newsletters sent successfully!');
 		return res.status(200).json({ message: 'All newsletters sent successfully!' });
 	} catch (error) {
 		console.error('Error sending newsletter:', error.response?.body || error);
